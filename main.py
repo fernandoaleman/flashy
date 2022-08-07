@@ -5,9 +5,16 @@ import random
 
 # ---------------------------- NEXT CARD ------------------------------- #
 
-data = pandas.read_csv("data/french_words.csv")
-to_learn = data.to_dict(orient="records")
 current_card = {}
+to_learn = {}
+
+try:
+    data = pandas.read_csv("data/words_to_learn.csv")
+except FileNotFoundError:
+    original_data = pandas.read_csv("data/french_words.csv")
+    to_learn = original_data.to_dict(orient="records")
+else:
+    to_learn = data.to_dict(orient="records")
 
 
 def next_card():
@@ -26,6 +33,15 @@ def flip_card():
     canvas.itemconfig(card_title, text="English", fill="white")
     canvas.itemconfig(card_word, text=current_card["English"], fill="white")
     canvas.itemconfig(card_background, image=card_back_image)
+
+
+# ---------------------------- IS KNOWN ------------------------------- #
+
+def is_known():
+    to_learn.remove(current_card)
+    is_known_data = pandas.DataFrame(to_learn)
+    is_known_data.to_csv("data/words_to_learn.csv", index=False)
+    next_card()
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -57,7 +73,7 @@ unknown_button.grid(row=1, column=0)
 
 check_image = PhotoImage(file="images/right.png")
 known_button = Button(image=check_image, highlightbackground=BACKGROUND_COLOR, highlightthickness=0,
-                      command=next_card)
+                      command=is_known)
 known_button.grid(row=1, column=1)
 
 next_card()
